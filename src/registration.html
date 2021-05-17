@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <!-- tab title -->
+        <title> Registration </title>
+
+        <!-- css implementation -->
+        <style type="text/css">
+            /* design of the div blocks */
+            div {
+                position: relative;
+                width: 100%;
+                height: 100%;
+            }
+
+            /* design of the background image (watermark) */
+            div img.background {
+                position: absolute;
+                top: 9cm;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                margin: auto;
+
+                width: 9.86cm;
+                height: 7.5cm;
+
+                opacity: 0.4;
+                z-index: -1;
+            }
+
+            /* design of the heading block */
+            div.heading {
+                height: 2cm;
+                line-height: 2cm;
+                background-color: rgb(172, 185, 202);
+            }
+
+            /* design of the heading text */
+            h1.heading {
+                margin: auto;
+                font-family: Arial;
+                font-size: 40px;
+                font-weight: bold;
+                text-align: center;
+            }
+
+            /* design of input form block */
+            div.form {
+                top: 1.7cm;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                margin: auto;
+
+                width: 7.5cm;
+                height: 6cm;
+            }
+
+            /* design of all user input types */
+            input {
+                /* general design */
+                /* given css design is overwritten when required */
+                display: inline-block;
+                box-sizing: border-box;
+
+                width: 100%;
+                margin: 3px 0;
+                padding: 7px 20px;
+
+                background: transparent;
+                text-align: center;
+                border-radius: 0px;
+            }
+
+            /* color of the placeholder */
+            ::placeholder {
+                color: black;
+            }
+
+            /* design of user input button(s) */
+            input[type=button] {
+                margin-top: 22px;
+
+                background-color: white;
+                border-radius: 12px;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+
+    <body>
+        <!-- heading text -->
+        <div class="heading"><h1 class="heading"> COVID - 19 Contact Tracing </h1></div>
+
+        <!-- background image inside the div block -->
+        <div><img class="background" alt="" src="images/watermark.png"></div>
+
+        <!-- user input request form block -->
+        <div class="form">
+        <form action="php/registration.php" method="get" id="form">
+            <div id="error" style="background-color: red">
+                <label id="errorMessage" style="color: white"></label>
+            </div>
+
+            <input type="text" id="name" name="name" placeholder="Name">
+            <input type="text" id="surname" name="surname" placeholder="Surname">
+            <input type="text" id="username" name="username" placeholder="Username">
+            <input type="text" id="password" name="password" placeholder="Password">
+
+            <input type="button" onclick="submitForm()" value="Register">
+        </form>
+        </div>
+
+        <!-- javascript implementation -->
+        <!-- checks the availability of mandatory fields (name and username) -->
+        <script type="text/javascript">
+            var loginName = document.getElementById("name");
+            var username = document.getElementById("username");
+
+            // used to submit the given form after input checks
+            function submitForm() {
+                if (loginName.value !== "" && username.value !== "") {
+                    document.getElementById("form").submit();
+                } else {
+                    displayError("*Name, Username and Password are required");
+                }
+            }
+
+            // used to display input errors when called
+            function displayError(error) {
+                document.getElementById("error").style.display = "block";
+                document.getElementById("errorMessage").innerHTML = error;
+            }
+        </script>
+    </body>
+
+</html>

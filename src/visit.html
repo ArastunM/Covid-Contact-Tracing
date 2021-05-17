@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <!-- tab title -->
+        <title> Add Visit </title>
+
+        <!-- loading the template -->
+        <!-- heading, menu and background design -->
+        <link href="template.css" rel="stylesheet">
+        <!-- css -->
+        <style type="text/css">
+            /* design of the content block */
+            div.content {
+                position: relative;
+                top: 0cm;
+                left: 3cm;
+                right: 0;
+                bottom: 6.5cm;
+                margin: auto;
+
+                width: 70%;
+                height: 15cm;
+            }
+
+            /* design of menu text */
+            a {
+                font-family: Arial;
+                font-size: 20px;
+            }
+
+            h1.heading {
+                text-align: center;
+            }
+
+            h2 {
+                text-align: center;
+            }
+
+            /* design of the form block */
+            div.form_block {
+                width: 40%;
+                height: 50%;
+                float: left;
+            }
+
+            /* design of all input types */
+            input {
+                display: inline-block;
+                box-sizing: border-box;
+
+                width: 80%;
+                margin: 3px 0;
+                padding: 7px 20px;
+
+                background: transparent;
+                text-align: center;
+                border-radius: 0px;
+            }
+
+            /* color of the placeholder */
+            ::placeholder {
+                color: black;
+            }
+
+            /* design of user input button(s) */
+            input.add {
+                margin-top: 85px;
+
+                background-color: white;
+                border-radius: 12px;
+                cursor: pointer;
+            }
+            input.cancel {
+                background-color: white;
+                border-radius: 12px;
+                cursor: pointer;
+            }
+
+            /* design of the map block */
+            div.map_block {
+                position: relative;
+                top: 0cm;
+                right: 0;
+                bottom: 0;
+
+                float: right;
+                width: 381px;
+                height: 300px;
+            }
+
+            /* design of the map image */
+            div.map_block img.map {
+                position: relative;
+                display: block;
+                width: 100%;
+                height: 100%;
+                border: 3px solid black;
+            }
+
+            /* design of the markers */
+            div.map_block img.marker {
+                position: absolute;
+                display: none;
+                top: 30px;
+                left: 30px;
+                width: 7%;
+                height: 10%;
+            }
+        </style>
+    </head>
+
+    <body>
+        <!-- heading text -->
+        <div class="heading"><h1 class="heading"> COVID - 19 Contact Tracing </h1></div>
+
+        <!-- background image inside the div block -->
+        <div><img class="background" alt="" src="images/watermark.png"></div>
+
+        <!-- menus side tabs -->
+        <div><ul class="menu">
+            <li><a href="home.html"> Home </a></li>
+            <li><a href="overview.html"> Overview </a></li>
+            <li><a href="visit.html"> Add Visit </a></li>
+            <li><a href="report.html"> Report </a></li>
+            <li><a href="settings.html"> Settings </a></li>
+            <li class="last"><a href="php/logout.php"> Logout </a></li>
+        </ul></div>
+
+        <!-- inner content block -->
+        <div class="content">
+            <h2> Add a new Visit </h2>
+            <!-- thematic break -->
+            <hr style="border-width: 0.05cm; background-color: black;">
+
+            <!-- form block -->
+            <div class="form_block">
+                <form action="php/addvisit.php" method="get" id="form">
+                    <!-- used to display the error message -->
+                    <div id="error" style="background-color: red; width: 80%">
+                        <label id="errorMessage" style="color: white"></label>
+                    </div>
+
+                    <input type="text" id="date" name="date" placeholder="Date">
+                    <input type="text" id="time" name="time" placeholder="Time">
+                    <input type="text" id="duration" name="duration" placeholder="Duration">
+                    <input type="hidden" id="x" name="x">
+                    <input type="hidden" id="y" name="y">
+
+                    <input type="button" class="add" onclick="submitForm()" value="Add">
+                    <input type="reset" class="cancel" value="Cancel">
+                </form>
+            </div>
+
+            <!-- map block -->
+            <div class="map_block">
+                <img class="map" id="map" alt="" src="images/exeter_map.jpg">
+                <img class="marker" id="marker" alt="" src="images/marker_black.png">
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            // declaring form fields
+            var date = document.getElementById("date");
+            var time = document.getElementById("time");
+            var duration = document.getElementById("duration");
+            var x = document.getElementById("x");
+            var y = document.getElementById("y");
+
+            // handling map marker position change events
+            var map = document.getElementById("map");
+            var marker = document.getElementById("marker");
+            var map_x = -1;
+            var map_y = -1;
+
+            // loading session values
+            getSessionInfo();
+
+            // tracking onmousedown on the map, placing the marker
+            map.onmousedown = function(event) {
+                marker.style.display = "block";
+                let map_rect = map.getBoundingClientRect();
+
+                map_x = event.clientX - map_rect.left;
+                map_y = event.clientY - map_rect.top;
+
+                // adjusting values to marker
+                marker.style.top = (map_y - 25) + "px";
+                marker.style.left = (map_x - 10) + "px";
+                // updating the values of hidden form fields
+                x.value = parseInt(map_x, 10);
+                y.value = parseInt(map_y, 10);
+
+                console.log("new marker position, x: " + x.value + " y: " + y.value);
+                return true;
+            };
+
+            // Checking if entered form fields are appropriate / submitting the form
+            function submitForm() {
+                if (date.value !== "" && time.value !== "" && duration.value !== "") {
+                    if (x.value !== "" && y.value !== "") {
+                        if (inputAppropriate())
+                            document.getElementById("form").submit();
+                    } else {
+                        displayError("*Please click on the map to set the marker");
+                    }
+                } else {
+                    displayError("*All fields are required to be filled");
+                }
+            }
+
+            // Checking if entered form fields are of required structure
+            function inputAppropriate() {
+                var dateCheck = "^\\d{4}-\\d{2}-\\d{2}$";
+                var timeCheck = "^\\d{2}:\\d{2}:\\d{2}$";
+
+                if (!isNaN(duration.value) && duration.value > 0) {
+                    if (date.value.length === 10 && date.value.match(dateCheck)) {
+                        var year = date.value.substr(0, 4);
+                        var month = date.value.substr(5, 2);
+                        var day = date.value.substr(8, 2);
+                        var date_obj = new Date(year, month - 1, day);
+
+                        if (dateInPast(date_obj)) {
+                            if (time.value.length === 8 && time.value.match(timeCheck)) {
+                                return true;
+                            }
+                            else {
+                                displayError("*Required time format -> HH:MM:SS");
+                                return false;
+                            }
+                        }
+                        else {
+                            displayError("*Given date should be in the past");
+                            return false;
+                        }
+                    }
+                    else {
+                        displayError("*Required date format -> YYYY-MM-DD");
+                        return false;
+                    }
+                }
+                else {
+                    displayError("*Duration must be a positive integer");
+                    return false;
+                }
+            }
+
+            // Displaying a customized error message
+            function displayError(error) {
+                document.getElementById("error").style.display = "block";
+                document.getElementById("errorMessage").innerHTML = error;
+            }
+
+            // used to check if given date is in the past
+            function dateInPast(given_date) {
+                var current_date = new Date();
+                // comparing 2 dates
+                var difference_in_day = (current_date.getTime() - given_date.getTime()) / (1000 * 3600 * 24);
+
+                 if (difference_in_day >= 0) {
+                    return true;
+                 } else {
+                    return false;
+                 }
+            }
+
+            // loading Session values
+            function getSessionInfo() {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        var response = this.responseText;
+
+                        if (response.trim() == "") {
+                            window.location.replace("login.html");
+                        }
+                    }
+                };
+                xmlHttp.open("GET", "php/getsession.php", true);
+                xmlHttp.send();
+            }
+        </script>
+    </body>
+
+</html>

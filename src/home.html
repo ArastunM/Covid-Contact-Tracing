@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <!-- tab title -->
+        <title> Home </title>
+
+        <!-- loading the template -->
+        <!-- heading, menu and background design -->
+        <link href="template.css" rel="stylesheet">
+        <!-- css -->
+        <style type="text/css">
+            /* design of the content block */
+            div.content {
+                position: relative;
+                top: 0cm;
+                left: 3cm;
+                right: 0;
+                bottom: 6.5cm;
+                margin: auto;
+
+                width: 70%;
+                height: 15cm;
+            }
+
+            /* deign of the text block */
+            div.text {
+                width: 40%;
+                height: 50%;
+                float: left;
+            }
+
+            /* design of the map block */
+            div.map_block {
+                position: relative;
+                top: 0cm;
+                right: 0;
+                bottom: 0;
+
+                float: right;
+                width: 381px;
+                height: 300px;
+            }
+
+            /* design of menu text */
+            div a {
+                font-family: Arial;
+                font-size: 20px;
+            }
+
+            /* design of the text */
+            div p {
+                font-family: Times New Roman;
+                font-size: 20px;
+            }
+
+            h1.heading {
+               text-align: center;
+            }
+
+            h2 {
+                text-align: center;
+            }
+
+            /* design of the map image */
+            div.map_block img.map {
+                position: relative;
+                display: block;
+                width: 100%;
+                height: 100%;
+                border: 3px solid black;
+            }
+
+            /* design of the markers */
+            div.map_block input.marker {
+                position: absolute;
+                top: 30px;
+                left: 30px;
+                width: 6%;
+                height:8.52%;
+            }
+        </style>
+    </head>
+
+    <body>
+        <!-- heading text -->
+        <div class="heading"><h1 class="heading"> COVID - 19 Contact Tracing </h1></div>
+
+        <!-- background image inside the div block -->
+        <div><img class="background" alt="" src="images/watermark.png"></div>
+
+        <!-- menus side tabs -->
+        <div><ul class="menu">
+            <li><a href="home.html"> Home </a></li>
+            <li><a href="overview.html"> Overview </a></li>
+            <li><a href="visit.html"> Add Visit </a></li>
+            <li><a href="report.html"> Report </a></li>
+            <li><a href="settings.html"> Settings </a></li>
+            <li class="last"><a href="php/logout.php"> Logout </a></li>
+        </ul></div>
+
+        <!-- inner content block -->
+        <div class="content">
+            <h2> Status </h2>
+            <!-- thematic break -->
+            <hr style="border-width: 0.05cm; background-color: black;">
+
+            <!-- text block -->
+            <div class="text">
+                <!-- text paragraphs -->
+                <p>
+                    Hi <b id="user"></b>, you might have had a connection to
+                    an infected person at the location shown in red.
+                </p>
+                <br><br><br><br>
+
+                <p>
+                    Click on the marker to see details about the infection.
+                </p>
+            </div>
+
+            <!-- map block -->
+            <div class="map_block" id="map_block">
+                <img class="map" alt="" src="images/exeter_map.jpg">
+                <!-- markers are added using javascript on runtime -->
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            // Global variables
+            // session variables
+            var name;
+            var id;
+            // settings variables
+            var user_window;
+            var user_distance;
+            // map block
+            var map_block = document.getElementById("map_block");
+            // user visits
+            all_user_visits = [];
+            // user visits within given window
+            user_visits = [];
+
+            // getting the session (ensuring there as been a log in)
+            getSessionInfo();
+            // getting settings details
+            getSettingsInfo();
+
+            // placing markers in given locations
+            function placeMarkers(locations) {
+                // assumes locations are given with .name
+                console.log("total number of location reports: " + locations.length);
+                // limit can be used to limit number of markers displayed
+                // default => all locations
+                var limit = locations.length;
+
+                // assigning markers for each location
+                for (var i = 0; i < limit; i++) {
+                    // checking if the obtained coordinates are within the map
+                    // comparison values were based of map_block div
+                    // top left and bottom right coordinates
+                    if ((locations[i].x >= 0 && locations[i].x < 386)
+                        && (locations[i].y >= 0 && locations[i].y < 301)) {
+                        // getting coordinates of current location
+                        var x_coord = parseInt(locations[i].x);
+                        var y_coord = parseInt(locations[i].y);
+
+                        // for each location insert a new marker
+                        var new_marker = document.createElement("input");
+                        new_marker.type = "image";
+                        new_marker.className = "marker";
+                        new_marker.id = "---- MARKER DETAILS ----\n" +
+                                        "Date: " + locations[i].date + "\n" +
+                                        "Time: " + locations[i].time + "\n" +
+                                        "Duration: " + locations[i].duration + "\n";
+
+                        if (putRedMarker(x_coord, y_coord)) {
+                            new_marker.src = "images/marker_red.png";
+                        }
+                        else {
+                            new_marker.src = "images/marker_black.png";
+                        }
+
+                        // appending on click function to see marker details
+                        new_marker.onclick = function() {
+                            alert(this.id);
+                        }
+
+                        // appending the marker to the div
+                        map_block.appendChild(new_marker);
+
+                        // setting marker position
+                        new_marker.style.left = (x_coord - 10) + "px";
+                        new_marker.style.top = (y_coord - 25) + "px";
+                    }
+                }
+            }
+
+            // checking if the marker should be red
+            // calculating distance between two locations
+            function putRedMarker(given_x, given_y) {
+                var user_x;
+                var user_y;
+                // checking for each user location (location visited by current used)
+                for (var i = 0; i < user_visits.length; i++) {
+                    user_x = parseInt(user_visits[i][3]);
+                    user_y = parseInt(user_visits[i][4]);
+
+                    // calculating the distance between locations
+                    var distance = Math.sqrt(Math.pow(user_x - given_x, 2) + Math.pow(user_y - given_y, 2));
+                    if (distance <= user_distance) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            // loading Session values
+            function getSessionInfo() {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        var response = this.responseText;
+
+                        if (response.trim() == "") {
+                            // returning to login.html if session is not set
+                            window.location.replace("login.html");
+                        }
+                        else {
+                            var return_array = response.split("<br>");
+                            name = return_array[0];
+                            id = return_array[1];
+                            console.log("user id: " + id);
+
+                            document.getElementById("user").innerHTML = name;
+                        }
+
+                    }
+                };
+                xmlHttp.open("GET", "php/getsession.php", true);
+                xmlHttp.send();
+            }
+
+            // loading user settings
+            function getSettingsInfo() {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        var response = this.responseText;
+
+                        if (response == "") {
+                            console.log("error getting settings values");
+                        }
+                        else {
+                            var return_array = response.split("*");
+                            user_window = return_array[0];
+                            user_distance = return_array[1];
+                            console.log("window: " + user_window + " distance: " + user_distance);
+
+                            // calling UserVisits() now that settings are set
+                            getUserVisits();
+                        }
+
+                    }
+                };
+                xmlHttp.open("GET", "php/getsettings.php", true);
+                xmlHttp.send();
+            }
+
+            // loading all visited places by infected persons (from external web service)
+            function getAllVisits() {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        var response = this.responseText;
+                        response = JSON.parse(response);
+                        // starting to place markers after getting all external locations
+                        placeMarkers(response);
+                    }
+                };
+                var url = "php/getinfections.php?";
+                url += "window=" + user_window * 7;
+                xmlHttp.open("GET", url, true);
+                xmlHttp.send();
+            }
+
+            // loading local user visits
+            function getUserVisits() {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        var visits = this.responseText.split("&");
+                        all_user_visits = [];
+
+                        for (var i = 0; i < visits.length; i++) {
+                            if (visits[i] !== "") {
+                                all_user_visits.push(visits[i].split("*"));
+                            }
+                        }
+                        // eliminating all user visits outside given window
+                        fixUserVisits();
+                    }
+                };
+                xmlHttp.open("GET", "php/getvisits.php", true);
+                xmlHttp.send();
+            }
+
+            // ensuring user visits are within the given window
+            function fixUserVisits() {
+                for (var i = 0; i < all_user_visits.length; i++) {
+                    // creating a date object based on user visit
+                    var year = all_user_visits[i][0].substr(0, 4);
+                    var month = all_user_visits[i][0].substr(5, 2);
+                    var day = all_user_visits[i][0].substr(8, 2);
+                    var date = new Date(year, month - 1, day);
+
+                    if (dateWithinGivenRange(date, user_window * 7)) {
+                        user_visits.push(all_user_visits[i]);
+                    }
+                }
+                // after everything is fetched
+                getAllVisits();
+            }
+
+            // used to check if date is within given_days (from today)
+            function dateWithinGivenRange(date_obj, given_days) {
+                var current_date = new Date();
+                // comparing 2 dates
+                var difference_in_day = (current_date.getTime() - date_obj.getTime()) / (1000 * 3600 * 24);
+
+                 if (difference_in_day >= 0 && difference_in_day <= given_days) {
+                    return true;
+                 } else {
+                    return false;
+                 }
+            }
+        </script>
+    </body>
+
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <!-- tab title -->
+        <title> Login </title>
+
+        <!-- css -->
+        <style type="text/css">
+            /* design of the div blocks */
+            div {
+                position: relative;
+                width: 100%;
+                height: 100%;
+            }
+
+            /* design of the background image (watermark) */
+            div img.background {
+                position: absolute;
+                top: 9cm;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                margin: auto;
+
+                width: 9.86cm;
+                height: 7.5cm;
+
+                opacity: 0.4;
+                z-index: -1;
+            }
+
+            /* design of the heading block */
+            div.heading {
+                height: 2cm;
+                line-height: 2cm;
+                background-color: rgb(172, 185, 202);
+            }
+
+            /* design of the heading text */
+            h1.heading {
+                margin: auto;
+                font-family: Arial;
+                font-size: 40px;
+                font-weight: bold;
+                text-align: center;
+            }
+
+            /* design of input form block */
+            div.form {
+                top: 1.7cm;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                margin: auto;
+
+                width: 7.5cm;
+                height: 6cm;
+            }
+
+            /* design of all user input types */
+            input {
+                /* general design */
+                /* given css design is overwritten when required */
+                display: block;
+                width: 100%;
+                padding: 7px 20px;
+
+                background-color: white;
+                text-align: center;
+                border-radius: 12px;
+                cursor: pointer;
+            }
+
+            /* design of user input texts */
+            input[type=text] {
+                margin: 8px 0;
+                display: inline-block;
+                box-sizing: border-box;
+
+                background: transparent;
+                border-radius: 6px;
+                cursor: auto;
+            }
+
+            /* color of the placeholder */
+            ::placeholder {
+                color: black;
+            }
+
+            /* design of user input buttons */
+            input[id=submit] {
+                float: left;
+                width: 48%;
+                margin-top: 24px;
+                margin-bottom: 10px;
+            }
+
+            input[id=cancel] {
+                float: right;
+                width: 48%;
+                margin-top: 24px;
+                margin-bottom: 10px;
+            }
+
+            /* design of links */
+            a:link { text-decoration: none; }
+            a:visited { text-decoration: none; }
+            a:hover { text-decoration: none; }
+            a:active { text-decoration: none; }
+        </style>
+    </head>
+
+    <body>
+        <!-- heading text -->
+        <div class="heading"><h1 class="heading"> COVID - 19 Contact Tracing </h1></div>
+
+        <!-- background image inside the div block -->
+        <div><img class="background" alt="" src="images/watermark.png"></div>
+
+        <!-- user input request form block -->
+        <div class="form">
+        <form action="php/login.php" method="get" id="form">
+            <input type="text" id="username" name="username" placeholder="Username">
+            <input type="text" id="password" name="password" placeholder="Password">
+
+            <input type="submit" id="submit" value="Login">
+            <input type="reset" id="cancel" value="Cancel">
+            <input type="button" id="register" onclick="toRegistration()" value="Register">
+        </form>
+        </div>
+
+        <script type="text/javascript">
+            function toRegistration() {
+                window.location.replace("registration.html");
+            }
+        </script>
+    </body>
+
+</html>

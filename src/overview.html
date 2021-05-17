@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <!-- tab title -->
+        <title> Overview </title>
+
+        <!-- loading the template -->
+        <!-- heading, menu and background design -->
+        <link href="template.css" rel="stylesheet">
+        <!-- css -->
+        <style type="text/css">
+            /* design of the content block */
+            div.content {
+                position: relative;
+                top: 1cm;
+                left: 3cm;
+                right: 0;
+                bottom: 0cm;
+                margin: auto;
+
+                width: 70%;
+                height: 15cm;
+            }
+
+            /* design of menu text */
+            a {
+                font-family: Arial;
+                font-size: 20px;
+            }
+
+            h1.heading {
+                text-align: center;
+            }
+
+            table.table {
+                text-align: left;
+            }
+
+            /* design of the table heading text */
+            tr.table_heading {
+                font-family: Arial;
+                font-size: 20px;
+                font-weight: bold;
+            }
+
+            /* design of the table text */
+            tr {
+                font-family: Times New Roman;
+                font-size: 20px;
+            }
+
+            /* design of the table */
+            table {
+                width: 80%;
+                height: 1.5cm;
+                float: left;
+            }
+
+            /* design of the cross button */
+            input[type=image].cross {
+                width: 0.5cm;
+                height: 0.5cm;
+            }
+        </style>
+    </head>
+
+    <body>
+        <!-- heading text -->
+        <div class="heading"><h1 class="heading"> COVID - 19 Contact Tracing </h1></div>
+
+        <!-- background image inside the div block -->
+        <div><img class="background" alt="" src="images/watermark.png"></div>
+
+        <!-- menus side tabs -->
+       <div><ul class="menu">
+            <li><a href="home.html"> Home </a></li>
+            <li><a href="overview.html"> Overview </a></li>
+            <li><a href="visit.html"> Add Visit </a></li>
+            <li><a href="report.html"> Report </a></li>
+            <li><a href="settings.html"> Settings </a></li>
+            <li class="last"><a href="php/logout.php"> Logout </a></li>
+        </ul></div>
+
+        <div class="content">
+            <table id="table" class="table">
+                <tr class="table_heading">
+                    <th> Date </th>
+                    <th> Time </th>
+                    <th> Duration </th>
+                    <th> X </th>
+                    <th> Y </th>
+                </tr>
+            </table>
+        </div>
+
+        <!-- javascript implementation -->
+        <!-- retrieves and inserts table content -->
+        <script type="text/javascript">
+            var name;
+            var id;
+
+            // getting session information
+            getSessionInfo();
+            // getting local user visits
+            getUserVisits();
+
+            // loading Session values
+            function getSessionInfo() {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        var response = this.responseText;
+
+                        if (response.trim() == "") {
+                            // redirecting to login.html when sessions has not been set
+                            window.location.replace("login.html");
+                        }
+                        else {
+                            var return_array = response.split("<br>");
+                            name = return_array[0];
+                            id = return_array[1];
+                        }
+                    }
+                };
+                xmlHttp.open("GET", "php/getsession.php", true);
+                xmlHttp.send();
+            }
+
+            // used to insert rows to the table
+            function insertRows(array) {
+                var table = document.getElementById("table");
+                var rowCount = array.length;
+
+                // inserting rows for all given array elements
+                for (var i = 0; i < rowCount; i++) {
+                    // initializing row i
+                    var row = table.insertRow(i + 1);
+                    var cell1 = row.insertCell(0);
+                    var cell2 = row.insertCell(1);
+                    var cell3 = row.insertCell(2);
+                    var cell4 = row.insertCell(3);
+                    var cell5 = row.insertCell(4);
+                    var cell6 = row.insertCell(5);
+
+                    // assigning cell values
+                    cell1.innerHTML = array[i][0];
+                    cell2.innerHTML = array[i][1];
+                    cell3.innerHTML = array[i][2];
+                    cell4.innerHTML = array[i][3];
+                    cell5.innerHTML = array[i][4];
+
+                    // assigning cross cell
+                    var cross = document.createElement('input');
+                    cross.type = "image";
+                    cross.id = i;
+                    cross.className = "cross";
+                    cross.src = "images/cross.png";
+
+                    // appending on click function to remove the row
+                    cross.onclick = function() {
+                        deleteTableRow(this);
+                    }
+                    cell6.appendChild(cross);
+                }
+            }
+
+            // deleting the given row
+            function deleteTableRow(givenRow) {
+                removeUserVisit(givenRow.id);
+                window.location.replace("overview.html");
+            }
+
+            // getting user visits
+            function getUserVisits() {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        var visits = this.responseText.split("&");
+                        var allVisits = [];
+
+                        for (var i = 0; i < visits.length; i++) {
+                            if (visits[i].length > 1) {
+                                allVisits.push(visits[i].split("*"));
+                            }
+                        }
+                        insertRows(allVisits);
+                    }
+                };
+                xmlHttp.open("GET", "php/getvisits.php", true);
+                xmlHttp.send();
+            }
+
+            // removing user visits from the database
+            function removeUserVisit(rowId) {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        var response = this.responseText;
+                    }
+                };
+                var url = "php/removevisit.php?id=" + rowId;
+                xmlHttp.open("GET", url, true);
+                xmlHttp.send();
+            }
+        </script>
+    </body>
+
+</html>

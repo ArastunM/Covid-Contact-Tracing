@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <!-- tab title -->
+        <title> Settings </title>
+
+        <!-- loading the template -->
+        <!-- heading, menu and background design -->
+        <link href="template.css" rel="stylesheet">
+        <!-- css -->
+        <style type="text/css">
+            /* design of the content block */
+            div.content {
+                position: relative;
+                top: 0cm;
+                left: 3cm;
+                right: 0;
+                bottom: 6.5cm;
+                margin: auto;
+
+                width: 70%;
+                height: 15cm;
+            }
+
+            /* design of menu text */
+            div a {
+                font-family: Arial;
+                font-size: 20px;
+            }
+
+            /* design of the text */
+            div p {
+                font-family: Times New Roman;
+                font-size: 20px;
+                text-align: center;
+            }
+
+            h1.heading {
+                text-align: center;
+            }
+
+            h2 {
+                text-align: center;
+            }
+
+            div.form_block {
+                height: 10cm;
+            }
+
+            /* design of all input types */
+            input {
+                display: inline-block;
+                box-sizing: border-box;
+
+                width: 40%;
+                margin: 6px 0;
+                padding: 7px 20px;
+
+                background: transparent;
+                text-align: center;
+                border-radius: 0px;
+            }
+
+            /* design of the select tag */
+            select {
+                border: 2px solid black;
+
+                width: 40%;
+                margin: 6px 0;
+                padding: 7px 20px;
+
+                background: transparent;
+                text-align: center;
+            }
+
+            /* design of user input button(s) */
+            input:not([type=text]) {
+                width: 30%;
+                margin-top: 15px;
+                float: left;
+
+                background-color: white;
+                border-radius: 12px;
+                cursor: pointer;
+            }
+            input.cancel {
+                float: right;
+            }
+        </style>
+    </head>
+
+    <body>
+        <!-- heading text -->
+        <div class="heading"><h1 class="heading"> COVID - 19 Contact Tracing </h1></div>
+
+        <!-- background image inside the div block -->
+        <div><img class="background" alt="" src="images/watermark.png"></div>
+
+        <!-- menus side tabs -->
+        <div><ul class="menu">
+            <li><a href="home.html"> Home </a></li>
+            <li><a href="overview.html"> Overview </a></li>
+            <li><a href="visit.html"> Add Visit </a></li>
+            <li><a href="report.html"> Report </a></li>
+            <li><a href="settings.html"> Settings </a></li>
+            <li class="last"><a href="php/logout.php"> Logout </a></li>
+        </ul></div>
+
+        <!-- inner content block -->
+        <div class="content">
+            <h2> Alert Settings </h2>
+            <!-- thematic break -->
+            <hr style="border-width: 0.05cm; background-color: black;">
+
+            <div class="form_block">
+                <form action="php/setsettings.php" method="get" id="form">
+                    <p>
+                        Here you may change the alert distance and the time span
+                        for which the contact tracing will be performed.
+                    </p>
+
+                    <div style="text-align: center; margin-top: 30px;">
+                        <div id="error" style="background-color: red; width: 100%">
+                            <label id="errorMessage" style="color: white"></label>
+                        </div>
+
+                        <label>window &emsp;
+                            <select name="window" id="window">
+                                <option disabled selected value></option>
+                                <option value="1"> 1 Week </option>
+                                <option value="2"> 2 Week </option>
+                                <option value="3"> 3 Week </option>
+                                <option value="4"> 4 Week </option>
+                            </select>
+                        </label>
+                        <br>
+                        <label>distance &emsp;<input type="text" id="distance" name="distance"></label>
+                    </div>
+
+                    <input type="button" class="report" onclick="submitForm()" value="Report">
+                    <input type="reset" class="cancel" value="Cancel">
+                </form>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            var distance = document.getElementById("distance");
+            var window_select = document.getElementById("window");
+
+            // loading session information
+            getSessionInfo();
+
+            // submitting the form
+            function submitForm() {
+                // input checks before form submission
+                if (window_select.value !== "") {
+                    if (!isNaN(distance.value) && distance.value > 0) {
+                        document.getElementById("form").submit();
+                    }
+                    else {
+                        displayError("*Duration should be a positive integer");
+                    }
+                }
+                else {
+                    displayError("*Please fill all form fields");
+                }
+            }
+
+            // Displaying a customized error message
+            function displayError(error) {
+                document.getElementById("error").style.display = "block";
+                document.getElementById("errorMessage").innerHTML = error;
+            }
+
+            // loading Session values
+            function getSessionInfo() {
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        var response = this.responseText;
+
+                        if (response.trim() == "") {
+                            window.location.replace("login.html");
+                        }
+                        else {
+                            var return_array = response.split("<br>");
+                            id = return_array[1];
+                            console.log(id);
+                        }
+
+                    }
+                };
+                xmlHttp.open("GET", "php/getsession.php", true);
+                xmlHttp.send();
+            }
+        </script>
+    </body>
+
+</html>
