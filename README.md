@@ -10,7 +10,7 @@ is already deployed to an Apache Web Server. Web Server and Services made use of
 
 
 ## Installation
-The application is already deployed, however; source files can be downladed from the [GitHub repository](https://github.com/ArastunM/Covid-Contact-Tracing.git)
+The application is already deployed; however, source files can be downladed from the [GitHub repository](https://github.com/ArastunM/Covid-Contact-Tracing.git)
 
 
 ## Getting Started
