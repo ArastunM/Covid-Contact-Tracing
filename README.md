@@ -1,5 +1,5 @@
 # Covid-Contact-Tracing
-COVID-19 Contact Tracing application makes use of HTML, CSS, JavaScript, PHP, MYSQL and custom Web Services. It can 
+COVID-19 Contact Tracing application makes use of HTML, CSS, JavaScript, PHP, MySQL and custom Web Services. It can 
 be used to contact trace and report COVID-19 cases in the UK, Exeter.
 
 The app provides a ***login/registration*** service, ***home*** and ***overview*** pages for tracking, 
